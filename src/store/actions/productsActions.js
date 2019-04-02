@@ -2,18 +2,36 @@ import axios from 'axios';
 
 const apiUrl = 'http://localhost:4000/products';
 
-export const updateProducts = (product) => {
+export const addProduct = (product) => {
   return (dispatch) => {
     return axios.post(`${apiUrl}/add`, product)
       .then(response => {
         dispatch({
-          type: 'ADD_PRODUCTS_SUCCESS',
+          type: 'ADD_PRODUCT_SUCCESS',
           product: response.data
         })
       })
       .catch(error => {
         dispatch({
-          type: 'ADD_PRODUCTS_ERROR',
+          type: 'API_ERROR',
+          error
+        })
+      });
+  };
+};
+
+export const updateProduct = (id, product) => {
+  return (dispatch) => {
+    return axios.put(`${apiUrl}/update/${id}`, product)
+      .then(response => {
+        dispatch({
+          type: 'UPDATE_PRODUCT_SUCCESS',
+          product: response.data
+        })
+      })
+      .catch(error => {
+        dispatch({
+          type: 'API_ERROR',
           error
         })
       });
@@ -33,7 +51,7 @@ export const getProducts = () => {
       })
       .catch(error => {
         dispatch({
-          type: 'FETCH_PRODUCTS_ERROR',
+          type: 'API_ERROR',
           error
         })
       });
@@ -50,7 +68,7 @@ export const deleteProduct = id => {
       })
       .catch(error => {
         dispatch({
-          type: 'DELETE_PRODUCT_ERROR',
+          type: 'API_ERROR',
           error
         })
       });

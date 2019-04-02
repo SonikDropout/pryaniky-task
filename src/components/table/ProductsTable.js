@@ -38,18 +38,21 @@ function getSorting(order, orderBy) {
 }
 
 
-function ProductsTable({ getProducts, data }) {
+function ProductsTable(props) {
+  const {
+    page, setPage,
+    rowsPerPage, setRowsPerPage,
+    products, getProducts
+  } = props;
   const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('calories');
+  const [orderBy, setOrderBy] = React.useState('name');
   const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   useEffect(() => {
     getProducts()
   }, [])
 
-  function handleRequestSort(event, property) {
+  function handleRequestSort(property) {
     const isDesc = orderBy === property && order === 'desc';
     setOrder(isDesc ? 'asc' : 'desc');
     setOrderBy(property);
@@ -57,14 +60,14 @@ function ProductsTable({ getProducts, data }) {
 
   function handleSelectAllClick(event) {
     if (event.target.checked) {
-      const newSelecteds = data.map(n => n.id);
+      const newSelecteds = products.map(n => n.id);
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
   }
 
-  function handleClick(event, id) {
+  function handleClick(id) {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
 
@@ -94,7 +97,7 @@ function ProductsTable({ getProducts, data }) {
 
   const isSelected = id => selected.indexOf(id) !== -1;
 
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
+  const emptyRows = rowsPerPage - Math.min(rowsPerPage, products.length - page * rowsPerPage);
 
   return (
     <Paper>
@@ -107,10 +110,10 @@ function ProductsTable({ getProducts, data }) {
             orderBy={orderBy}
             onSelectAllClick={handleSelectAllClick}
             onRequestSort={handleRequestSort}
-            rowCount={data.length}
+            rowCount={products.length}
           />
           <TableBody>
-            {stableSort(data, getSorting(order, orderBy))
+            {stableSort(products, getSorting(order, orderBy))
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map(n => {
                 const isItemSelected = isSelected(n.id);
@@ -144,9 +147,9 @@ function ProductsTable({ getProducts, data }) {
         </Table>
       </div>
       <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[10, 25]}
         component="div"
-        count={data.length}
+        count={products.length}
         rowsPerPage={rowsPerPage}
         page={page}
         backIconButtonProps={{
@@ -163,11 +166,15 @@ function ProductsTable({ getProducts, data }) {
 }
 
 const mapStateToProps = (state) => ({
-  data: state.products
+  products: state.products,
+  page: state.pagination.page,
+  rowsPerPage: state.pagination.rowsPerPage
 })
 
 const mapDispatchToPros = (dispatch) => ({
-  getProducts: () => dispatch(getProducts())
+  getProducts: () => dispatch(getProducts()),
+  setPage: (newPage) => dispatch({ type: 'CHANGE_PAGE', newPage }),
+  setRowsPerPage: (rowsPerPage) => dispatch({ type: 'SET_ROWS_PER_PAGE', rowsPerPage })
 })
 
 export default connect(mapStateToProps, mapDispatchToPros)(ProductsTable);
