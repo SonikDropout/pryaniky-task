@@ -2,11 +2,28 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import * as serviceWorker from './serviceWorker';
+import { createStore, applyMiddleware } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
+import thunk from 'redux-thunk';
+import { Provider } from 'react-redux';
+import schema from './JSONforms/schema.json';
+import uischema from './JSONforms/uischema.json';
+import { Actions } from '@jsonforms/core';
+import rootReducer from './store/reducers';
+import { initData, initState } from './JSONforms/init'
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const store = createStore(
+  rootReducer,
+  initState,
+  composeWithDevTools(applyMiddleware(thunk))
+);
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+store.dispatch(Actions.init(initData, schema, uischema));
+
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('root')
+);
