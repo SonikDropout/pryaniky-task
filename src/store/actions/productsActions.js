@@ -24,6 +24,7 @@ export const updateProduct = (id, product) => {
   return (dispatch) => {
     return axios.put(`${apiUrl}/update/${id}`, product)
       .then(response => {
+        console.log(response.data)
         dispatch({
           type: 'UPDATE_PRODUCT_SUCCESS',
           product: response.data
@@ -58,12 +59,13 @@ export const getProducts = () => {
   };
 };
 
-export const deleteProduct = id => {
+export const deleteProducts = selectedProducts => {
   return (dispatch) => {
-    return axios.get(`${apiUrl}/delete/${id}`)
+    return axios.post(`${apiUrl}/delete`, selectedProducts)
       .then(response => {
         dispatch({
-          type: 'DELETE_PRODUCT_SUCCESS',
+          type: 'DELETE_PRODUCTS_SUCCESS',
+          deleted: response.data
         })
       })
       .catch(error => {

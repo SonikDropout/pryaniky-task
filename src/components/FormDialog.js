@@ -1,17 +1,37 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@material-ui/core';
 import { JsonForms } from '@jsonforms/react';
 import { addProduct, updateProduct } from '../store/actions/productsActions'
+import { Actions } from '@jsonforms/core';
+import { initData } from '../JSONforms/init'
 
 
-function FormDialog({ isOpen, closeDialog, editingProduct, addProduct, updateProduct, formData }) {
+function FormDialog(props) {
+  const {
+    isOpen,
+    products,
+    closeDialog,
+    editedProductId,
+    addProduct,
+    updateProduct,
+    formData,
+    resetFormData,
+    setEditedProduct
+  } = props
+
+  useEffect(() => {
+    const editedProduct = products.find(product => product._id === editedProductId)
+    setEditedProduct(editedProduct)
+  }, [editedProductId])
+
   const createProduct = () => {
     addProduct(formData)
+    resetFormData()
   }
 
   const saveProductChanges = () => {
-    updateProduct(editingProduct, formData)
+    updateProduct(editedProductId, formData)
   }
   return (
     <div>
@@ -20,13 +40,19 @@ function FormDialog({ isOpen, closeDialog, editingProduct, addProduct, updatePro
         onClose={closeDialog}
         aria-labelledby="form-dialog-title"
       >
-        <DialogTitle id="form-dialog-title">Enter product Info</DialogTitle>
+        <DialogTitle id="form-dialog-title">
+          {
+            editedProductId
+              ? 'Edit product info'
+              : 'Enter product info'
+          }
+        </DialogTitle>
         <DialogContent>
           <JsonForms />
         </DialogContent>
         <DialogActions>
           {
-            editingProduct ?
+            editedProductId ?
               (
                 <Button onClick={saveProductChanges} color="primary">
                   Save changes
@@ -49,14 +75,16 @@ function FormDialog({ isOpen, closeDialog, editingProduct, addProduct, updatePro
 const mapStateToProps = (state) => ({
   isOpen: state.isDialogOpen,
   products: state.products,
-  editingProduct: state.editingProduct,
-  formData: state.jsonforms
+  editedProductId: state.editedProductId,
+  formData: state.jsonforms.core.data,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   closeDialog: () => dispatch({ type: 'CLOSE_DIALOG' }),
-  updateProduct: (product) => dispatch(updateProduct(product)),
-  addProduct: (product) => dispatch(addProduct(product))
+  updateProduct: (id, product) => dispatch(updateProduct(id, product)),
+  addProduct: (product) => dispatch(addProduct(product)),
+  resetFormData: () => dispatch(Actions.update('', () => initData)),
+  setEditedProduct: (product) => dispatch(Actions.update('', () => product)),
 })
 
 

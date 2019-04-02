@@ -1,13 +1,17 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
-import Checkbox from '@material-ui/core/Checkbox';
+import {
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TablePagination,
+  TableRow,
+  Paper,
+  Checkbox,
+} from '@material-ui/core'
+import { Edit } from '@material-ui/icons'
 import { getProducts } from '../../store/actions/productsActions'
 import ProductsTableToolbar from './ProductsTableToolbar'
 import ProductsTableHead from './ProductsTableHead'
@@ -42,11 +46,12 @@ function ProductsTable(props) {
   const {
     page, setPage,
     rowsPerPage, setRowsPerPage,
-    products, getProducts
+    products, getProducts,
+    selected, selectProduct, deselectProduct, setSelected,
+    setEditing
   } = props;
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('name');
-  const [selected, setSelected] = React.useState([]);
 
   useEffect(() => {
     getProducts()
@@ -60,31 +65,17 @@ function ProductsTable(props) {
 
   function handleSelectAllClick(event) {
     if (event.target.checked) {
-      const newSelecteds = products.map(n => n.id);
+      const newSelecteds = products.map(n => n._id);
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
   }
 
-  function handleClick(id) {
-    const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelected(newSelected);
+  const handleSelect = (id) => {
+    selected.indexOf(id) === -1
+      ? selectProduct(id)
+      : deselectProduct(id)
   }
 
   function handleChangePage(event, newPage) {
@@ -101,7 +92,7 @@ function ProductsTable(props) {
 
   return (
     <Paper>
-      <ProductsTableToolbar numSelected={selected.length} />
+      <ProductsTableToolbar />
       <div>
         <Table aria-labelledby="tableTitle">
           <ProductsTableHead
@@ -116,25 +107,26 @@ function ProductsTable(props) {
             {stableSort(products, getSorting(order, orderBy))
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map(n => {
-                const isItemSelected = isSelected(n.id);
+                const isItemSelected = isSelected(n._id);
                 return (
                   <TableRow
                     hover
-                    onClick={event => handleClick(event, n.id)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={n.id}
-                    selected={isItemSelected}
+                    key={n._id}
                   >
                     <TableCell padding="checkbox">
-                      <Checkbox checked={isItemSelected} />
+                      <Checkbox onClick={() => handleSelect(n._id)} checked={isItemSelected} />
                     </TableCell>
                     <TableCell component="th" scope="row" padding="none">
                       {n.name}
                     </TableCell>
                     <TableCell>{n.price}</TableCell>
                     <TableCell>{n.description}</TableCell>
+                    <TableCell>
+                      <IconButton onClick={() => setEditing(n._id)}>
+                        <Edit />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
                 );
               })}
@@ -168,13 +160,18 @@ function ProductsTable(props) {
 const mapStateToProps = (state) => ({
   products: state.products,
   page: state.pagination.page,
-  rowsPerPage: state.pagination.rowsPerPage
+  rowsPerPage: state.pagination.rowsPerPage,
+  selected: state.selected
 })
 
 const mapDispatchToPros = (dispatch) => ({
   getProducts: () => dispatch(getProducts()),
   setPage: (newPage) => dispatch({ type: 'CHANGE_PAGE', newPage }),
-  setRowsPerPage: (rowsPerPage) => dispatch({ type: 'SET_ROWS_PER_PAGE', rowsPerPage })
+  setRowsPerPage: (rowsPerPage) => dispatch({ type: 'SET_ROWS_PER_PAGE', rowsPerPage }),
+  selectProduct: (id) => dispatch({ type: 'SELECT_PRODUCT', id }),
+  deselectProduct: (id) => dispatch({ type: 'DESELECT_PRODUCT', id }),
+  setSelected: (newSelected) => dispatch({ type: 'SET_SELECTED', newSelected }),
+  setEditing: (id) => dispatch({ type: 'EDIT_PRODUCT', id })
 })
 
 export default connect(mapStateToProps, mapDispatchToPros)(ProductsTable);

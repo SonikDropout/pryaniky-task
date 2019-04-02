@@ -4,12 +4,14 @@ import dialogReducer from './dialogReducer'
 import editReducer from './editReducer'
 import productsReducer from './productsReducer'
 import paginationReducer from './paginationReducer'
+import selectedReducer from './selectedReducer';
 
 
 export default combineReducers({
   jsonforms: jsonformsReducer(),
   isDialogOpen: dialogReducer,
-  editingProduct: editReducer,
+  editedProductId: editReducer,
   products: productsReducer,
-  pagination: paginationReducer
+  pagination: paginationReducer,
+  selected: selectedReducer
 })
