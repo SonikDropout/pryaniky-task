@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@material-ui/core';
 import { JsonForms } from '@jsonforms/react';
@@ -71,6 +72,19 @@ function FormDialog(props) {
     </div>
   )
 }
+
+
+FormDialog.propTypes = {
+  products: PropTypes.array.isRequired,
+  editedProductId: PropTypes.string.isRequired,
+  formData: PropTypes.object.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  closeDialog: PropTypes.func.isRequired,
+  updateProduct: PropTypes.func.isRequired,
+  addProduct: PropTypes.func.isRequired,
+  resetFormData: PropTypes.func.isRequired,
+  setEditedProduct: PropTypes.func.isRequired,
+};
 
 const mapStateToProps = (state) => ({
   isOpen: state.isDialogOpen,

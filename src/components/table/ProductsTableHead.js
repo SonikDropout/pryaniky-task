@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux'
 import PropTypes from 'prop-types';
 import {
   TableHead,
@@ -10,16 +11,33 @@ import {
 } from '@material-ui/core';
 
 const rows = [
-  { id: 'name', numeric: false, label: 'Product name' },
-  { id: 'price', numeric: true, label: 'Price ($)' },
-  { id: 'description', numeric: false, label: 'Description' },
+  { name: 'name', numeric: false, label: 'Product name' },
+  { name: 'price', numeric: true, label: 'Price ($)' },
+  { name: 'description', numeric: false, label: 'Description' },
 ];
 
 function ProductsTableHead(props) {
-  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-  const createSortHandler = property => event => {
-    onRequestSort(event, property);
-  };
+  const {
+    rowCount, productIds,
+    numSelected, setSelected,
+    order, setOrder,
+    orderBy, setOrderBy
+  } = props;
+
+  const handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      setSelected(productIds);
+    } else {
+      setSelected([]);
+    }
+  }
+
+
+  const handleRequestSort = (property) => {
+    const isDesc = orderBy === property && order === 'desc';
+    setOrder(isDesc ? 'asc' : 'desc');
+    setOrderBy(property);
+  }
 
   return (
     <TableHead>
@@ -28,14 +46,14 @@ function ProductsTableHead(props) {
           <Checkbox
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={numSelected === rowCount}
-            onChange={onSelectAllClick}
+            onChange={handleSelectAllClick}
           />
         </TableCell>
         {rows.map(
           row => (
             <TableCell
-              key={row.id}
-              sortDirection={orderBy === row.id ? order : false}
+              key={row.name}
+              sortDirection={orderBy === row.name ? order : false}
             >
               <Tooltip
                 title="Sort"
@@ -43,9 +61,9 @@ function ProductsTableHead(props) {
                 enterDelay={300}
               >
                 <TableSortLabel
-                  active={orderBy === row.id}
+                  active={orderBy === row.name}
                   direction={order}
-                  onClick={createSortHandler(row.id)}
+                  onClick={() => handleRequestSort(row.name)}
                 >
                   {row.label}
                 </TableSortLabel>
@@ -54,6 +72,9 @@ function ProductsTableHead(props) {
           ),
           this,
         )}
+        <TableCell>
+          Action
+        </TableCell>
       </TableRow>
     </TableHead>
   );
@@ -61,11 +82,27 @@ function ProductsTableHead(props) {
 
 ProductsTableHead.propTypes = {
   numSelected: PropTypes.number.isRequired,
-  onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
+  rowCount: PropTypes.number.isRequired,
+  productIds: PropTypes.array.isRequired,
   order: PropTypes.string.isRequired,
   orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired,
+  setSelected: PropTypes.func.isRequired,
+  setOrder: PropTypes.func.isRequired,
+  setOrderBy: PropTypes.func.isRequired,
 };
 
-export default ProductsTableHead;
+const mapStateToProps = (state) => ({
+  numSelected: state.selected.length,
+  rowCount: state.products.length,
+  productIds: state.products.map(product => product._id),
+  order: state.sort.order,
+  orderBy: state.sort.orderBy,
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  setSelected: (newSelected) => dispatch({ type: 'SET_SELECTED', newSelected }),
+  setOrder: (newOrder) => dispatch({ type: 'SET_ORDER', newOrder }),
+  setOrderBy: (newOrderBy) => dispatch({ type: 'SET_ORDER_BY', newOrderBy }),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProductsTableHead);

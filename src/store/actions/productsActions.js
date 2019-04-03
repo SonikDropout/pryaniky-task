@@ -24,7 +24,6 @@ export const updateProduct = (id, product) => {
   return (dispatch) => {
     return axios.put(`${apiUrl}/update/${id}`, product)
       .then(response => {
-        console.log(response.data)
         dispatch({
           type: 'UPDATE_PRODUCT_SUCCESS',
           product: response.data
@@ -48,7 +47,6 @@ export const getProducts = () => {
           type: 'FETCH_PRODUCTS_SUCCESS',
           products: response.data
         })
-        console.log(response.data)
       })
       .catch(error => {
         dispatch({

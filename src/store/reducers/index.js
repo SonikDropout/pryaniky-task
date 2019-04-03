@@ -4,7 +4,8 @@ import dialogReducer from './dialogReducer'
 import editReducer from './editReducer'
 import productsReducer from './productsReducer'
 import paginationReducer from './paginationReducer'
-import selectedReducer from './selectedReducer';
+import selectedReducer from './selectedReducer'
+import sortReducer from './sortReducer'
 
 
 export default combineReducers({
@@ -13,5 +14,6 @@ export default combineReducers({
   editedProductId: editReducer,
   products: productsReducer,
   pagination: paginationReducer,
-  selected: selectedReducer
+  selected: selectedReducer,
+  sort: sortReducer
 })

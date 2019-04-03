@@ -47,30 +47,14 @@ function ProductsTable(props) {
     page, setPage,
     rowsPerPage, setRowsPerPage,
     products, getProducts,
-    selected, selectProduct, deselectProduct, setSelected,
-    setEditing
+    selected, selectProduct, deselectProduct,
+    setEditing,
+    order, orderBy
   } = props;
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('name');
 
   useEffect(() => {
     getProducts()
   }, [])
-
-  function handleRequestSort(property) {
-    const isDesc = orderBy === property && order === 'desc';
-    setOrder(isDesc ? 'asc' : 'desc');
-    setOrderBy(property);
-  }
-
-  function handleSelectAllClick(event) {
-    if (event.target.checked) {
-      const newSelecteds = products.map(n => n._id);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  }
 
   const handleSelect = (id) => {
     selected.indexOf(id) === -1
@@ -78,11 +62,11 @@ function ProductsTable(props) {
       : deselectProduct(id)
   }
 
-  function handleChangePage(event, newPage) {
+  const handleChangePage = (event, newPage) => {
     setPage(newPage);
   }
 
-  function handleChangeRowsPerPage(event) {
+  const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(event.target.value);
   }
 
@@ -99,8 +83,6 @@ function ProductsTable(props) {
             numSelected={selected.length}
             order={order}
             orderBy={orderBy}
-            onSelectAllClick={handleSelectAllClick}
-            onRequestSort={handleRequestSort}
             rowCount={products.length}
           />
           <TableBody>
@@ -115,7 +97,7 @@ function ProductsTable(props) {
                     key={n._id}
                   >
                     <TableCell padding="checkbox">
-                      <Checkbox onClick={() => handleSelect(n._id)} checked={isItemSelected} />
+                      <Checkbox onChange={() => handleSelect(n._id)} checked={isItemSelected} title="select product" />
                     </TableCell>
                     <TableCell component="th" scope="row" padding="none">
                       {n.name}
@@ -123,7 +105,7 @@ function ProductsTable(props) {
                     <TableCell>{n.price}</TableCell>
                     <TableCell>{n.description}</TableCell>
                     <TableCell>
-                      <IconButton onClick={() => setEditing(n._id)}>
+                      <IconButton onClick={() => setEditing(n._id)} title="edit product">
                         <Edit />
                       </IconButton>
                     </TableCell>
@@ -157,11 +139,28 @@ function ProductsTable(props) {
   );
 }
 
+ProductsTable.propTypes = {
+  products: PropTypes.array.isRequired,
+  page: PropTypes.number.isRequired,
+  rowsPerPage: PropTypes.number.isRequired,
+  selected: PropTypes.array.isRequired,
+  order: PropTypes.string.isRequired,
+  orderBy: PropTypes.string.isRequired,
+  getProducts: PropTypes.func.isRequired,
+  setPage: PropTypes.func.isRequired,
+  setRowsPerPage: PropTypes.func.isRequired,
+  selectProduct: PropTypes.func.isRequired,
+  deselectProduct: PropTypes.func.isRequired,
+  setEditing: PropTypes.func.isRequired,
+};
+
 const mapStateToProps = (state) => ({
   products: state.products,
   page: state.pagination.page,
   rowsPerPage: state.pagination.rowsPerPage,
-  selected: state.selected
+  selected: state.selected,
+  order: state.sort.order,
+  orderBy: state.sort.orderBy,
 })
 
 const mapDispatchToPros = (dispatch) => ({
@@ -170,7 +169,6 @@ const mapDispatchToPros = (dispatch) => ({
   setRowsPerPage: (rowsPerPage) => dispatch({ type: 'SET_ROWS_PER_PAGE', rowsPerPage }),
   selectProduct: (id) => dispatch({ type: 'SELECT_PRODUCT', id }),
   deselectProduct: (id) => dispatch({ type: 'DESELECT_PRODUCT', id }),
-  setSelected: (newSelected) => dispatch({ type: 'SET_SELECTED', newSelected }),
   setEditing: (id) => dispatch({ type: 'EDIT_PRODUCT', id })
 })
 
