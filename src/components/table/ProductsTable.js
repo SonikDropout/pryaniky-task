@@ -11,35 +11,47 @@ import {
   Paper,
   Checkbox,
 } from '@material-ui/core'
+import { makeStyles } from '@material-ui/styles'
 import { Edit } from '@material-ui/icons'
 import { getProducts } from '../../store/actions/productsActions'
 import ProductsTableToolbar from './ProductsTableToolbar'
 import ProductsTableHead from './ProductsTableHead'
 
 
-function desc(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
+function sortProducts(products, order, orderBy) {
+  // in case there is nothing to sort
+  if (products.length === 0) return products
+
+  const orderByType = typeof (products[0][orderBy])
+  if (orderByType === 'string') {
+    return products.sort((a, b) => (
+      order === 'asc'
+        ? a[orderBy].localeCompare(b[orderBy])
+        : - a[orderBy].localeCompare(b[orderBy])
+    ))
+  } else if (orderByType === 'Number') {
+    return products.sort((a, b) => (
+      order === 'asc'
+        ? a[orderBy] - b[orderBy]
+        : b[orderBy] - a[orderBy]
+    ))
   }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
 }
 
-function stableSort(array, cmp) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = cmp(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map(el => el[0]);
-}
 
-function getSorting(order, orderBy) {
-  return order === 'desc' ? (a, b) => desc(a, b, orderBy) : (a, b) => -desc(a, b, orderBy);
-}
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+    maxWidth: 1280,
+    margin: '0 auto',
+  },
+  table: {
+    minWidth: 768,
+  },
+  tableWrapper: {
+    overflowX: 'auto',
+  },
+}));
 
 
 function ProductsTable(props) {
@@ -72,13 +84,13 @@ function ProductsTable(props) {
 
   const isSelected = id => selected.indexOf(id) !== -1;
 
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, products.length - page * rowsPerPage);
+  const classes = useStyles()
 
   return (
-    <Paper>
+    <Paper className={classes.root}>
       <ProductsTableToolbar />
-      <div>
-        <Table aria-labelledby="tableTitle">
+      <div className={classes.tableWrapper}>
+        <Table className={classes.table} aria-labelledby="tableTitle">
           <ProductsTableHead
             numSelected={selected.length}
             order={order}
@@ -86,7 +98,7 @@ function ProductsTable(props) {
             rowCount={products.length}
           />
           <TableBody>
-            {stableSort(products, getSorting(order, orderBy))
+            {sortProducts(products, order, orderBy)
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map(n => {
                 const isItemSelected = isSelected(n._id);
@@ -112,11 +124,6 @@ function ProductsTable(props) {
                   </TableRow>
                 );
               })}
-            {emptyRows > 0 && (
-              <TableRow style={{ height: 49 * emptyRows }}>
-                <TableCell colSpan={6} />
-              </TableRow>
-            )}
           </TableBody>
         </Table>
       </div>

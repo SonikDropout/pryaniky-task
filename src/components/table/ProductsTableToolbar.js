@@ -22,7 +22,7 @@ const ProductsTableToolbar = ({ selected, addProduct, deleteSelected }) => {
           </Typography>
           )}
       </div>
-      <div />
+      <div style={{ flex: '1 1 100%' }} ></div>
       <div>
         {numSelected > 0 ? (
           <Tooltip title="Delete">

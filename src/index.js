@@ -10,7 +10,9 @@ import schema from './JSONforms/schema.json';
 import uischema from './JSONforms/uischema.json';
 import { Actions } from '@jsonforms/core';
 import rootReducer from './store/reducers';
-import { initData, initState } from './JSONforms/init'
+import { initData, initState } from './JSONforms/init';
+import { createMuiTheme } from "@material-ui/core/styles";
+import { ThemeProvider } from "@material-ui/styles";
 
 const store = createStore(
   rootReducer,
@@ -20,10 +22,13 @@ const store = createStore(
 
 store.dispatch(Actions.init(initData, schema, uischema));
 
+const theme = createMuiTheme({ typography: { useNextVariants: true } });
 
 ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
+  <ThemeProvider theme={theme}>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </ThemeProvider>,
   document.getElementById('root')
 );
