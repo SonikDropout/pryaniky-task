@@ -6,6 +6,7 @@ import productsReducer from './productsReducer'
 import paginationReducer from './paginationReducer'
 import selectedReducer from './selectedReducer'
 import sortReducer from './sortReducer'
+import apiMessageReducer from './apiMessageReducer'
 
 
 export default combineReducers({
@@ -15,5 +16,6 @@ export default combineReducers({
   products: productsReducer,
   pagination: paginationReducer,
   selected: selectedReducer,
-  sort: sortReducer
+  sort: sortReducer,
+  apiMessages: apiMessageReducer,
 })

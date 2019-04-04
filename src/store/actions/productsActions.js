@@ -13,7 +13,7 @@ export const addProduct = (product) => {
       })
       .catch(error => {
         dispatch({
-          type: 'API_ERROR',
+          type: 'ADD_PRODUCT_ERROR',
           error
         })
       });
@@ -31,7 +31,7 @@ export const updateProduct = (id, product) => {
       })
       .catch(error => {
         dispatch({
-          type: 'API_ERROR',
+          type: 'UPDATE_PRODUCT_ERROR',
           error
         })
       });
@@ -50,7 +50,7 @@ export const getProducts = () => {
       })
       .catch(error => {
         dispatch({
-          type: 'API_ERROR',
+          type: 'FETCH_PRODUCTS_ERROR',
           error
         })
       });
@@ -68,7 +68,7 @@ export const deleteProducts = selectedProducts => {
       })
       .catch(error => {
         dispatch({
-          type: 'API_ERROR',
+          type: 'DELETE_PRODUCTS_ERROR',
           error
         })
       });

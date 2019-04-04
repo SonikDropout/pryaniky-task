@@ -2,11 +2,17 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@material-ui/core';
+import { makeStyles } from '@material-ui/styles'
 import { JsonForms } from '@jsonforms/react';
 import { addProduct, updateProduct } from '../store/actions/productsActions'
 import { Actions } from '@jsonforms/core';
 import { initData } from '../JSONforms/init'
 
+const useStyles = makeStyles((theme) => ({
+  dialogContent: {
+    overflowX: 'hidden',
+  },
+}));
 
 function FormDialog(props) {
   const {
@@ -34,6 +40,9 @@ function FormDialog(props) {
   const saveProductChanges = () => {
     updateProduct(editedProductId, formData)
   }
+
+  const classes = useStyles()
+
   return (
     <div>
       <Dialog
@@ -48,7 +57,7 @@ function FormDialog(props) {
               : 'Enter product info'
           }
         </DialogTitle>
-        <DialogContent>
+        <DialogContent className={classes.dialogContent}>
           <JsonForms />
         </DialogContent>
         <DialogActions>

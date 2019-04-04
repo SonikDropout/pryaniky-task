@@ -11,7 +11,7 @@ import {
   Paper,
   Checkbox,
 } from '@material-ui/core'
-import { makeStyles } from '@material-ui/styles'
+import { withStyles } from '@material-ui/styles'
 import { Edit } from '@material-ui/icons'
 import { getProducts } from '../../store/actions/productsActions'
 import ProductsTableToolbar from './ProductsTableToolbar'
@@ -39,7 +39,7 @@ function sortProducts(products, order, orderBy) {
 }
 
 
-const useStyles = makeStyles((theme) => ({
+const styles = {
   root: {
     width: '100%',
     maxWidth: 1280,
@@ -51,17 +51,23 @@ const useStyles = makeStyles((theme) => ({
   tableWrapper: {
     overflowX: 'auto',
   },
-}));
+  message: {
+    textAlign: 'center',
+    fontWeight: 400,
+    fontSize: '1rem',
+  }
+};
 
 
 function ProductsTable(props) {
   const {
     page, setPage,
     rowsPerPage, setRowsPerPage,
-    products, getProducts,
+    products, getProducts, productsStatus,
     selected, selectProduct, deselectProduct,
     setEditing,
-    order, orderBy
+    order, orderBy,
+    classes
   } = props;
 
   useEffect(() => {
@@ -84,7 +90,68 @@ function ProductsTable(props) {
 
   const isSelected = id => selected.indexOf(id) !== -1;
 
-  const classes = useStyles()
+  const rederRows = () => {
+    if (productsStatus === 'empty') {
+      return (
+        <TableRow>
+          <TableCell colSpan={5}>
+            <h4 className={classes.message}>
+              No products found in database
+            </h4>
+          </TableCell>
+        </TableRow>
+      )
+    } else if (productsStatus) {
+      return (
+        <TableRow>
+          <TableCell colSpan={5}>
+            <h4 className={classes.message}>
+              Opps... something is wrong with database connection. Try refreshing the page.
+            </h4>
+          </TableCell>
+        </TableRow>
+      )
+    } else if (!products.length) {
+      return (
+        <TableRow>
+          <TableCell colSpan={5}>
+            <h4 className={classes.message}>
+              Loading products...
+            </h4>
+          </TableCell>
+        </TableRow>
+      )
+    } else {
+      return (
+        sortProducts(products, order, orderBy)
+          .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+          .map(n => {
+            const isItemSelected = isSelected(n._id);
+            return (
+              <TableRow
+                hover
+                tabIndex={-1}
+                key={n._id}
+              >
+                <TableCell padding="checkbox">
+                  <Checkbox onChange={() => handleSelect(n._id)} checked={isItemSelected} title="select product" />
+                </TableCell>
+                <TableCell component="th" scope="row" padding="none">
+                  {n.name}
+                </TableCell>
+                <TableCell>{n.price}</TableCell>
+                <TableCell>{n.description}</TableCell>
+                <TableCell>
+                  <IconButton onClick={() => setEditing(n._id)} title="edit product">
+                    <Edit />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            );
+          })
+      )
+    }
+  }
 
   return (
     <Paper className={classes.root}>
@@ -98,32 +165,7 @@ function ProductsTable(props) {
             rowCount={products.length}
           />
           <TableBody>
-            {sortProducts(products, order, orderBy)
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map(n => {
-                const isItemSelected = isSelected(n._id);
-                return (
-                  <TableRow
-                    hover
-                    tabIndex={-1}
-                    key={n._id}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox onChange={() => handleSelect(n._id)} checked={isItemSelected} title="select product" />
-                    </TableCell>
-                    <TableCell component="th" scope="row" padding="none">
-                      {n.name}
-                    </TableCell>
-                    <TableCell>{n.price}</TableCell>
-                    <TableCell>{n.description}</TableCell>
-                    <TableCell>
-                      <IconButton onClick={() => setEditing(n._id)} title="edit product">
-                        <Edit />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+            {rederRows()}
           </TableBody>
         </Table>
       </div>
@@ -152,6 +194,7 @@ ProductsTable.propTypes = {
   rowsPerPage: PropTypes.number.isRequired,
   selected: PropTypes.array.isRequired,
   order: PropTypes.string.isRequired,
+  productsStatus: PropTypes.string.isRequired,
   orderBy: PropTypes.string.isRequired,
   getProducts: PropTypes.func.isRequired,
   setPage: PropTypes.func.isRequired,
@@ -163,6 +206,7 @@ ProductsTable.propTypes = {
 
 const mapStateToProps = (state) => ({
   products: state.products,
+  productsStatus: state.apiMessages.fetchProducts,
   page: state.pagination.page,
   rowsPerPage: state.pagination.rowsPerPage,
   selected: state.selected,
@@ -179,4 +223,4 @@ const mapDispatchToPros = (dispatch) => ({
   setEditing: (id) => dispatch({ type: 'EDIT_PRODUCT', id })
 })
 
-export default connect(mapStateToProps, mapDispatchToPros)(ProductsTable);
+export default withStyles(styles)(connect(mapStateToProps, mapDispatchToPros)(ProductsTable))
