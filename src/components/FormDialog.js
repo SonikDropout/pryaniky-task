@@ -2,52 +2,60 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles'
+import { withStyles } from '@material-ui/styles'
 import { JsonForms } from '@jsonforms/react';
 import { addProduct, updateProduct } from '../store/actions/productsActions'
 import { Actions } from '@jsonforms/core';
 import { initData } from '../JSONforms/init'
 
-const useStyles = makeStyles((theme) => ({
+const styles = {
   dialogContent: {
     overflowX: 'hidden',
   },
-}));
+};
 
 function FormDialog(props) {
   const {
     isOpen,
     products,
     closeDialog,
-    editedProductId,
+    editedProductId, unsetEditedProduct,
     addProduct,
     updateProduct,
     formData,
-    resetFormData,
-    setEditedProduct
+    setFormData,
+    classes,
   } = props
 
   useEffect(() => {
     const editedProduct = products.find(product => product._id === editedProductId)
-    setEditedProduct(editedProduct)
+    setFormData(editedProduct)
   }, [editedProductId])
 
   const createProduct = () => {
     addProduct(formData)
-    resetFormData()
+    setFormData(initData)
   }
 
   const saveProductChanges = () => {
     updateProduct(editedProductId, formData)
   }
 
-  const classes = useStyles()
+  const handleCloseDialog = () => {
+    if (editedProductId) {
+      unsetEditedProduct()
+      closeDialog()
+      setFormData(initData)
+    } else {
+      closeDialog()
+    }
+  }
 
   return (
     <div>
       <Dialog
         open={isOpen}
-        onClose={closeDialog}
+        onClose={handleCloseDialog}
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">
@@ -73,7 +81,7 @@ function FormDialog(props) {
                 </Button>
               )
           }
-          <Button onClick={closeDialog} color="primary">
+          <Button onClick={handleCloseDialog} color="primary">
             Cancel
             </Button>
         </DialogActions>
@@ -91,8 +99,8 @@ FormDialog.propTypes = {
   closeDialog: PropTypes.func.isRequired,
   updateProduct: PropTypes.func.isRequired,
   addProduct: PropTypes.func.isRequired,
-  resetFormData: PropTypes.func.isRequired,
-  setEditedProduct: PropTypes.func.isRequired,
+  setFormData: PropTypes.func.isRequired,
+  unsetEditedProduct: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -106,9 +114,9 @@ const mapDispatchToProps = (dispatch) => ({
   closeDialog: () => dispatch({ type: 'CLOSE_DIALOG' }),
   updateProduct: (id, product) => dispatch(updateProduct(id, product)),
   addProduct: (product) => dispatch(addProduct(product)),
-  resetFormData: () => dispatch(Actions.update('', () => initData)),
-  setEditedProduct: (product) => dispatch(Actions.update('', () => product)),
+  setFormData: (data) => dispatch(Actions.update('', () => data)),
+  unsetEditedProduct: () => dispatch({ type: 'EDIT_PRODUCT_CANCEL' })
 })
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(FormDialog)
+export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(FormDialog))
