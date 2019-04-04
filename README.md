@@ -23,5 +23,5 @@ It correctly bundles React in production mode and optimizes the build for the be
 ### `npm run backend`
 
 Runs backend server, listening on port 4000.
-App uses this server in oreder to retrive data from database.
+App uses this server in order to retrive data from database.
 
