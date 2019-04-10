@@ -83,7 +83,9 @@ function ProductsTableHead(props) {
 ProductsTableHead.propTypes = {
   numSelected: PropTypes.number.isRequired,
   rowCount: PropTypes.number.isRequired,
-  productIds: PropTypes.array.isRequired,
+  productIds: PropTypes.arrayOf(
+    PropTypes.string.isRequired
+  ).isRequired,
   order: PropTypes.string.isRequired,
   orderBy: PropTypes.string.isRequired,
   setSelected: PropTypes.func.isRequired,

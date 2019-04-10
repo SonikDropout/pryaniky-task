@@ -100,7 +100,12 @@ function productsTableRows(props) {
 }
 
 productsTableRows.propTypes = {
-  products: PropTypes.array.isRequired,
+  products: PropTypes.arrayOf(PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    description: PropTypes.string
+  }).isRequired).isRequired,
   productsStatus: PropTypes.string.isRequired,
   selected: PropTypes.array.isRequired,
   order: PropTypes.string.isRequired,

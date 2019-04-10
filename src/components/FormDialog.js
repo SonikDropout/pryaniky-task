@@ -92,7 +92,12 @@ function FormDialog(props) {
 
 
 FormDialog.propTypes = {
-  products: PropTypes.array.isRequired,
+  products: PropTypes.arrayOf(PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    description: PropTypes.string
+  }).isRequired).isRequired,
   editedProductId: PropTypes.string.isRequired,
   formData: PropTypes.object.isRequired,
   isOpen: PropTypes.bool.isRequired,
